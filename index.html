@@ -1,10 +1,629 @@
-<html>
-<title>teste</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portfólio de Engenharia de Dados: pipeline Apache Airflow integrando Dolibarr e Invoice Ninja, com transformação em Pandas, PostgreSQL e dashboards no Metabase.">
+  <meta name="author" content="Rafael Orizio">
+  <meta property="og:title" content="Accurato Data Platform | Portfólio de Engenharia de Dados">
+  <meta property="og:description" content="Do CRM ao dashboard: pipeline de dados de ponta a ponta com Airflow, Python, PostgreSQL e Metabase.">
+  <meta property="og:type" content="website">
+  <title>Accurato Data Platform | Portfólio de Engenharia de Dados</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
 <body>
+  <a class="skip-link" href="#inicio">Pular para o conteúdo</a>
 
-  teste
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Accurato Data Platform">
+        <span class="brand-mark">AD</span>
+        <span class="brand-text">
+          <strong>Accurato Data</strong>
+          <span>Data Engineering Portfolio</span>
+        </span>
+      </a>
 
-  
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#inicio" aria-current="page">Início</a></li>
+        <li><a href="#arquitetura">Arquitetura</a></li>
+        <li><a href="#pipeline">Pipeline</a></li>
+        <li><a href="#dashboards">Dashboards</a></li>
+        <li><a href="documentacao.html">Documentação</a></li>
+        <li><a href="metabase.html">Guia Metabase</a></li>
+      </ul>
+
+      <a class="nav-cta" href="https://github.com/SEU-USUARIO/DE_CRM_Metabase_Airflow" data-config="github" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12 0 1.53-.01 2.76-.01 3.14 0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        GitHub
+      </a>
+
+      <button class="nav-toggle" type="button" aria-label="Abrir menu" aria-controls="nav-links" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow"><i class="dot"></i>Portfólio de Engenharia de Dados</span>
+          <h1>Do CRM ao dashboard:<br><span class="gradient-text">um data lake de ponta a ponta.</span></h1>
+          <p class="hero-lead">
+            Pipeline em <strong>Apache Airflow</strong> que integra o CRM Dolibarr (MySQL) e o
+            Invoice Ninja (CSV), transforma os dados com <strong>Pandas</strong>, entrega em
+            <strong>PostgreSQL</strong> e alimenta dashboards analíticos no <strong>Metabase</strong>.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="documentacao.html">
+              Explorar documentação
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="metabase.html">Guia de dashboards</a>
+          </div>
+          <div class="hero-meta">
+            <span><i class="tick">✓</i> Orquestração diária</span>
+            <span><i class="tick">✓</i> Upsert idempotente</span>
+            <span><i class="tick">✓</i> Documentação versionada</span>
+          </div>
+        </div>
+
+        <div class="hero-panel" aria-label="Prévia do dashboard executivo">
+          <div class="hero-panel-inner">
+            <div class="panel-top">
+              <span class="panel-title">acctech_analytics · visão executiva</span>
+              <span class="panel-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            </div>
+
+            <div class="kpi-grid">
+              <div class="kpi">
+                <div class="kpi-label">Faturamento total</div>
+                <div class="kpi-value">R$ 535.122<small>,94</small></div>
+                <div class="kpi-delta">↑ consolidado no período</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Recebido</div>
+                <div class="kpi-value">R$ 409.603<small>,52</small></div>
+                <div class="kpi-delta">76,5% do total</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">A receber</div>
+                <div class="kpi-value">R$ 125.519<small>,42</small></div>
+                <div class="kpi-delta warn">2 faturas em aberto</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Faturas</div>
+                <div class="kpi-value">12</div>
+                <div class="kpi-delta">2 clientes ativos</div>
+              </div>
+            </div>
+
+            <div class="spark">
+              <div class="spark-head">
+                <span>Faturamento mensal</span>
+                <strong>Nov: R$ 125,5 mil</strong>
+              </div>
+              <svg viewBox="0 0 400 100" role="img" aria-label="Evolução mensal do faturamento de julho a novembro">
+                <defs>
+                  <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#22d3ee"/>
+                    <stop offset="100%" stop-color="#8b5cf6"/>
+                  </linearGradient>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.28"/>
+                    <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="rgba(148,163,184,0.14)" stroke-width="1">
+                  <line x1="0" y1="20" x2="400" y2="20"/>
+                  <line x1="0" y1="50" x2="400" y2="50"/>
+                  <line x1="0" y1="80" x2="400" y2="80"/>
+                </g>
+                <path d="M10 92 L105 16 L200 15 L295 29 L390 24 L390 100 L10 100 Z" fill="url(#areaGrad)"/>
+                <polyline points="10,92 105,16 200,15 295,29 390,24" fill="none" stroke="url(#lineGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <g fill="#0a1220" stroke="#22d3ee" stroke-width="2">
+                  <circle cx="10" cy="92" r="3.5"/>
+                  <circle cx="105" cy="16" r="3.5"/>
+                  <circle cx="200" cy="15" r="3.5"/>
+                  <circle cx="295" cy="29" r="3.5"/>
+                  <circle cx="390" cy="24" r="3.5"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="pipeline-mini" aria-hidden="true">
+              <span>MySQL</span><i></i><span>Airflow</span><i></i><span>PostgreSQL</span><i></i><span>Metabase</span>
+            </div>
+            <p class="panel-note">Prévia ilustrativa com os CSVs de exemplo do repositório.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div class="stats reveal">
+          <div class="stat">
+            <div class="stat-value"><span>2</span> CRMs</div>
+            <div class="stat-label">Dolibarr + Invoice Ninja</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value"><span>2</span> DAGs</div>
+            <div class="stat-label">Agendamento @daily</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value"><span>1</span> tabela fato</div>
+            <div class="stat-label">DH_INVOICES no PostgreSQL</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value"><span>12</span> campos</div>
+            <div class="stat-label">Modelo pronto para BI</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="arquitetura">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="kicker">Arquitetura</span>
+          <h2>Uma visão clara do fluxo de dados</h2>
+          <p class="section-lead">
+            Duas origens de CRM convergem para um mesmo modelo analítico. O Airflow orquestra
+            extração, transformação e carga; o Metabase consome a camada final via SQL.
+          </p>
+        </div>
+
+        <div class="architecture reveal">
+          <div class="arch-row">
+            <div class="arch-col">
+              <div class="arch-node source-mysql">
+                <strong>Dolibarr CRM</strong>
+                <small>10.89.0.8 · MySQL</small>
+                <span class="tag">Faturas</span>
+              </div>
+              <div class="arch-node source-csv">
+                <strong>Invoice Ninja</strong>
+                <small>invoices.csv + clients.csv</small>
+                <span class="tag">CSV</span>
+              </div>
+            </div>
+
+            <div class="arch-arrow" aria-hidden="true"></div>
+
+            <div class="arch-col">
+              <div class="arch-node airflow">
+                <strong>acctech_dl1</strong>
+                <small>extract → transform → load</small>
+                <span class="tag">Airflow</span>
+              </div>
+              <div class="arch-node airflow">
+                <strong>acctech_dl2</strong>
+                <small>read → transform → load</small>
+                <span class="tag">Airflow</span>
+              </div>
+            </div>
+
+            <div class="arch-arrow" aria-hidden="true"></div>
+
+            <div class="arch-col">
+              <div class="arch-node transform">
+                <strong>Transformação</strong>
+                <small>Python · Pandas</small>
+                <span class="tag">Limpeza + regras</span>
+              </div>
+            </div>
+
+            <div class="arch-arrow" aria-hidden="true"></div>
+
+            <div class="arch-col">
+              <div class="arch-node postgres">
+                <strong>PostgreSQL DW</strong>
+                <small>192.168.0.100</small>
+                <span class="tag">DH_INVOICES</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="arch-down">
+            <span class="arch-down-arrow" aria-hidden="true">↓</span>
+            <div class="arch-node metabase">
+              <strong>Metabase</strong>
+              <small>Dashboards, filtros e alertas</small>
+              <span class="tag">Business Intelligence</span>
+            </div>
+            <p>Consultas SQL diretas na tabela <code class="code-inline">DH_INVOICES</code>, com perguntas reutilizáveis, filtros e assinaturas.</p>
+          </div>
+
+          <div class="arch-legend">
+            <span><i class="l1"></i>Origem MySQL</span>
+            <span><i class="l2"></i>Origem CSV</span>
+            <span><i class="l3"></i>Orquestração</span>
+            <span><i class="l4"></i>Transformação</span>
+            <span><i class="l5"></i>Data Warehouse</span>
+            <span><i class="l6"></i>Consumo analítico</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pipeline">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="kicker">Pipeline</span>
+          <h2>Extract, Transform, Load</h2>
+          <p class="section-lead">
+            O projeto aplica o padrão ETL com tarefas idempotentes e cargas incrementais
+            via <em>upsert</em> pela chave primária <code class="code-inline">dl_st_ref</code>.
+          </p>
+        </div>
+
+        <div class="pipeline reveal">
+          <article class="pipeline-step">
+            <div class="step-number">01</div>
+            <h3>Extract</h3>
+            <p>
+              O DAG <strong>acctech_dl1</strong> consulta as tabelas
+              <code class="code-inline">llx_facture</code> e
+              <code class="code-inline">llx_societe</code> no MySQL.
+              O DAG <strong>acctech_dl2</strong> lê os CSVs de faturas e clientes do Invoice Ninja.
+            </p>
+          </article>
+          <article class="pipeline-step">
+            <div class="step-number">02</div>
+            <h3>Transform</h3>
+            <p>
+              Padroniza referências, converte datas, normaliza valores no formato brasileiro,
+              mescla clientes e faturas e adiciona metadados de processamento com Pandas.
+            </p>
+          </article>
+          <article class="pipeline-step">
+            <div class="step-number">03</div>
+            <h3>Load</h3>
+            <p>
+              Cria a tabela <code class="code-inline">DH_INVOICES</code> se necessário e faz
+              <em>upsert</em> no PostgreSQL usando a referência da fatura como chave.
+            </p>
+          </article>
+        </div>
+
+        <div class="grid-2" style="margin-top: 26px;">
+          <div class="card reveal">
+            <div class="card-icon">DL1</div>
+            <h3>Dolibarr → PostgreSQL</h3>
+            <p>Extração direta do banco transacional MySQL com filtro de faturas válidas e carga incremental.</p>
+            <div class="meta">
+              <span class="pill rose">MySQL</span>
+              <span class="pill cyan">PythonOperator</span>
+              <span class="pill green">Upsert</span>
+            </div>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon amber">DL2</div>
+            <h3>Invoice Ninja → PostgreSQL</h3>
+            <p>Leitura dos arquivos CSV, enriquecimento com dados de clientes e normalização monetária pt-BR.</p>
+            <div class="meta">
+              <span class="pill amber">CSV</span>
+              <span class="pill violet">Pandas merge</span>
+              <span class="pill green">Upsert</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="stack">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="kicker">Stack</span>
+          <h2>Tecnologias que sustentam a solução</h2>
+          <p class="section-lead">
+            Ferramentas escolhidas para orquestração confiável, processamento simples e
+            análise self-service.
+          </p>
+        </div>
+
+        <div class="grid-4">
+          <div class="card reveal">
+            <div class="card-icon">AF</div>
+            <h3>Apache Airflow</h3>
+            <p>Orquestração das DAGs, retries, agendamento diário e rastreabilidade das execuções.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon green">PY</div>
+            <h3>Python + Pandas</h3>
+            <p>Extração, limpeza, padronização, merge de clientes e regras de negócio.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon violet">SQL</div>
+            <h3>PostgreSQL</h3>
+            <p>Data warehouse com a tabela fato <code class="code-inline">DH_INVOICES</code> e chave de negócio.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon amber">BI</div>
+            <h3>Metabase</h3>
+            <p>Camada de análise com perguntas SQL, dashboards, filtros e assinaturas.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon">MY</div>
+            <h3>MySQL</h3>
+            <p>Banco transacional do Dolibarr CRM, fonte das faturas e dos clientes.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon green">CSV</div>
+            <h3>Arquivos CSV</h3>
+            <p>Exportações do Invoice Ninja versionadas no diretório <code class="code-inline">include/data</code>.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon violet">GIT</div>
+            <h3>Git + GitHub</h3>
+            <p>Código, documentação e portfólio publicados com GitHub Pages.</p>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon amber">DQ</div>
+            <h3>Data Quality</h3>
+            <p>Chave única, campos obrigatórios, normalização de datas e valores monetários.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="dashboards">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="kicker">Analytics</span>
+          <h2>Dashboards planejados no Metabase</h2>
+          <p class="section-lead">
+            A camada final foi desenhada para responder às perguntas de receita, recebíveis,
+            clientes e comportamento de pagamento.
+          </p>
+        </div>
+
+        <div class="dash-preview reveal" aria-label="Prévia ilustrativa do dashboard">
+          <div class="dash-toolbar">
+            <span class="dash-brand"><i></i>Accurato · Visão Executiva</span>
+            <span class="dash-filters">
+              <span class="dash-filter">Período: 2026</span>
+              <span class="dash-filter">Cliente: Todos</span>
+              <span class="dash-filter">Moeda: BRL</span>
+            </span>
+          </div>
+
+          <div class="dash-kpis">
+            <div class="dash-kpi"><span>Faturamento</span><strong class="cyan">R$ 535,1 mil</strong></div>
+            <div class="dash-kpi"><span>Recebido</span><strong class="teal">R$ 409,6 mil</strong></div>
+            <div class="dash-kpi"><span>Em aberto</span><strong class="amber">R$ 125,5 mil</strong></div>
+            <div class="dash-kpi"><span>Ticket médio</span><strong>R$ 44,6 mil</strong></div>
+          </div>
+
+          <div class="dash-charts">
+            <div class="dash-chart">
+              <h4>Faturamento por mês</h4>
+              <div class="bars" role="img" aria-label="Faturamento mensal: julho 13 mil, agosto 138,6 mil, setembro 140,9 mil, outubro 117,1 mil, novembro 125,5 mil">
+                <div class="bar-wrap"><div class="bar" style="height: 9%;"></div><span>jul</span></div>
+                <div class="bar-wrap"><div class="bar" style="height: 98%;"></div><span>ago</span></div>
+                <div class="bar-wrap"><div class="bar" style="height: 100%;"></div><span>set</span></div>
+                <div class="bar-wrap"><div class="bar" style="height: 83%;"></div><span>out</span></div>
+                <div class="bar-wrap"><div class="bar alt" style="height: 89%;"></div><span>nov</span></div>
+              </div>
+            </div>
+            <div class="dash-chart">
+              <h4>Recebido x em aberto</h4>
+              <div class="donut-wrap">
+                <div class="donut">
+                  <span class="donut-center">76,5%</span>
+                </div>
+                <div class="donut-legend">
+                  <span><i class="lg1"></i>Recebido · R$ 409,6 mil</span>
+                  <span><i class="lg2"></i>Em aberto · R$ 125,5 mil</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-list reveal" style="margin-top: 26px;">
+          <div class="dashboard-item">
+            <div class="di-icon">01</div>
+            <div>
+              <h4>Visão Executiva</h4>
+              <p>KPIs de faturamento, recebimento, saldo em aberto, ticket médio e evolução mensal.</p>
+            </div>
+          </div>
+          <div class="dashboard-item">
+            <div class="di-icon">02</div>
+            <div>
+              <h4>Faturamento & Receita</h4>
+              <p>Análise temporal por mês, cliente e moeda, com comparativos de curto período.</p>
+            </div>
+          </div>
+          <div class="dashboard-item">
+            <div class="di-icon">03</div>
+            <div>
+              <h4>Recebíveis & Aging</h4>
+              <p>Faturas em aberto por faixa de atraso, vencimentos e priorização de cobrança.</p>
+            </div>
+          </div>
+          <div class="dashboard-item">
+            <div class="di-icon">04</div>
+            <div>
+              <h4>Clientes</h4>
+              <p>Ranking de clientes, participação na receita, ticket médio e histórico de compras.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-actions reveal" style="margin-top: 30px;">
+          <a class="btn btn-primary" href="metabase.html">
+            Abrir guia de construção dos dashboards
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="modelo">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="kicker">Modelo de dados</span>
+          <h2>Tabela fato <code class="code-inline">DH_INVOICES</code></h2>
+          <p class="section-lead">
+            Estrutura única que recebe as duas origens. As referências do Invoice Ninja são
+            prefixadas com <code class="code-inline">INV-</code> para evitar colisão com o Dolibarr.
+          </p>
+        </div>
+
+        <div class="table-wrap reveal">
+          <table>
+            <thead>
+              <tr>
+                <th>Campo</th>
+                <th>Tipo</th>
+                <th>Descrição</th>
+                <th>Origem</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>dl_st_ref</code></td><td>varchar(100)</td><td>Referência única da fatura (PK)</td><td>Dolibarr / Invoice Ninja</td></tr>
+              <tr><td><code>dl_dt_date_facture</code></td><td>timestamp</td><td>Data de emissão da fatura</td><td>Ambas</td></tr>
+              <tr><td><code>dl_dt_due_to</code></td><td>timestamp</td><td>Data de vencimento</td><td>Ambas</td></tr>
+              <tr><td><code>dl_dc_total</code></td><td>numeric(15,2)</td><td>Valor total da fatura</td><td>Ambas</td></tr>
+              <tr><td><code>dl_dc_balance</code></td><td>numeric(15,2)</td><td>Saldo em aberto</td><td>Invoice Ninja</td></tr>
+              <tr><td><code>dl_st_customer_code</code></td><td>varchar(50)</td><td>Código do cliente no CRM</td><td>Ambas</td></tr>
+              <tr><td><code>dl_st_customer</code></td><td>varchar(255)</td><td>Nome do cliente</td><td>Ambas</td></tr>
+              <tr><td><code>dl_st_document</code></td><td>varchar(18)</td><td>Documento fiscal (CNPJ/ID)</td><td>Ambas</td></tr>
+              <tr><td><code>dl_st_currency</code></td><td>varchar(10)</td><td>Moeda da fatura</td><td>Ambas</td></tr>
+              <tr><td><code>dl_ts_facture_tms</code></td><td>timestamp</td><td>Timestamp de atualização da fatura</td><td>Dolibarr / CSV</td></tr>
+              <tr><td><code>dl_ts_customer_tms</code></td><td>timestamp</td><td>Timestamp de atualização do cliente</td><td>Dolibarr</td></tr>
+              <tr><td><code>processed_at</code></td><td>timestamp</td><td>Momento do processamento no pipeline</td><td>Pipeline</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">Dicionário completo, regras de negócio e consultas SQL disponíveis na documentação.</p>
+      </div>
+    </section>
+
+    <section class="section" id="documentacao">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="kicker">Documentação</span>
+          <h2>Conhecimento que acompanha o código</h2>
+          <p class="section-lead">
+            Tudo o que é necessário para reproduzir o ambiente, operar as DAGs e evoluir o
+            modelo analítico.
+          </p>
+        </div>
+
+        <div class="grid-3">
+          <a class="card reveal" href="documentacao.html#arquitetura">
+            <div class="card-icon">AR</div>
+            <h3>Arquitetura e fluxo</h3>
+            <p>Fontes, camadas, decisões de projeto, estrutura de diretórios e limitações atuais.</p>
+            <div class="meta"><span class="pill cyan">Visão geral</span></div>
+          </a>
+          <a class="card reveal" href="documentacao.html#dags">
+            <div class="card-icon violet">DG</div>
+            <h3>DAGs e transformações</h3>
+            <p>Detalhamento das tarefas, consultas SQL, regras de limpeza e estratégia de carga.</p>
+            <div class="meta"><span class="pill violet">Airflow</span></div>
+          </a>
+          <a class="card reveal" href="documentacao.html#setup">
+            <div class="card-icon amber">ST</div>
+            <h3>Setup e operação</h3>
+            <p>Conexões, caminhos, execução, monitoramento, troubleshooting e próximos passos.</p>
+            <div class="meta"><span class="pill amber">Hands-on</span></div>
+          </a>
+        </div>
+
+        <div class="hero-actions reveal" style="margin-top: 30px;">
+          <a class="btn btn-ghost" href="documentacao.html">Ler documentação completa</a>
+          <a class="btn btn-ghost" href="metabase.html">Ver guia do Metabase</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="sobre">
+      <div class="container">
+        <div class="grid-2" style="align-items: center;">
+          <div class="reveal">
+            <span class="kicker">Sobre o projeto</span>
+            <h2>Engenharia de dados aplicada ao negócio</h2>
+            <p class="section-lead">
+              Este projeto foi construído para transformar dados operacionais de CRM em
+              informação confiável para tomada de decisão. O foco está em simplicidade
+              operacional, idempotência e rastreabilidade.
+            </p>
+            <ul class="checklist" style="margin-top: 20px;">
+              <li>Pipeline diário com retries e tarefas desacopladas</li>
+              <li>Modelo único para duas origens de CRM</li>
+              <li>Documentação e código versionados no GitHub</li>
+              <li>BI self-service com Metabase e SQL transparente</li>
+            </ul>
+          </div>
+          <div class="card reveal">
+            <div class="card-icon green">RO</div>
+            <h3>Rafael Orizio</h3>
+            <p>Engenheiro de Dados · Python · SQL · Airflow · PostgreSQL · Metabase</p>
+            <div class="meta">
+              <span class="pill cyan">ETL / ELT</span>
+              <span class="pill violet">Data Modeling</span>
+              <span class="pill green">Analytics Engineering</span>
+            </div>
+            <div class="hero-actions" style="margin-top: 20px;">
+              <a class="btn btn-primary" href="https://github.com/SEU-USUARIO/DE_CRM_Metabase_Airflow" data-config="github" target="_blank" rel="noopener">GitHub</a>
+              <a class="btn btn-ghost" href="https://www.linkedin.com/in/SEU-PERFIL" data-config="linkedin" target="_blank" rel="noopener">LinkedIn</a>
+              <a class="btn btn-ghost" href="mailto:seu-email@exemplo.com" data-config="email">E-mail</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <span class="brand-mark">AD</span>
+            <span class="brand-text">
+              <strong>Accurato Data</strong>
+              <span>Data Engineering Portfolio</span>
+            </span>
+          </a>
+          <p>Pipeline de dados de ponta a ponta: CRMs, Airflow, PostgreSQL e Metabase.</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h5>Projeto</h5>
+            <a href="index.html#arquitetura">Arquitetura</a>
+            <a href="index.html#pipeline">Pipeline</a>
+            <a href="index.html#dashboards">Dashboards</a>
+            <a href="index.html#modelo">Modelo de dados</a>
+          </div>
+          <div class="footer-col">
+            <h5>Documentação</h5>
+            <a href="documentacao.html">Guia completo</a>
+            <a href="documentacao.html#setup">Setup</a>
+            <a href="documentacao.html#qualidade">Qualidade</a>
+            <a href="metabase.html">Metabase</a>
+          </div>
+          <div class="footer-col">
+            <h5>Links</h5>
+            <a href="https://github.com/SEU-USUARIO/DE_CRM_Metabase_Airflow" data-config="github" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://www.linkedin.com/in/SEU-PERFIL" data-config="linkedin" target="_blank" rel="noopener">LinkedIn</a>
+            <a href="mailto:seu-email@exemplo.com" data-config="email">E-mail</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> Rafael Orizio. Portfólio de Engenharia de Dados.</span>
+        <span>Apache Airflow · Python · PostgreSQL · Metabase</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/script.js"></script>
 </body>
 </html>
-

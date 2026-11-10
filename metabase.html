@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Guia passo a passo para conectar o PostgreSQL ao Metabase e construir dashboards de faturamento, recebíveis, aging e clientes.">
+  <meta name="author" content="Rafael Orizio">
+  <title>Guia Metabase | Accurato Data Platform</title>
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html" aria-label="Accurato Data Platform">
+        <span class="brand-mark">AD</span>
+        <span class="brand-text">
+          <strong>Accurato Data</strong>
+          <span>Data Engineering Portfolio</span>
+        </span>
+      </a>
+
+      <ul class="nav-links" id="nav-links">
+        <li><a href="index.html">Início</a></li>
+        <li><a href="documentacao.html">Documentação</a></li>
+        <li><a href="metabase.html" aria-current="page">Guia Metabase</a></li>
+        <li><a href="index.html#dashboards">Dashboards</a></li>
+      </ul>
+
+      <a class="nav-cta" href="https://github.com/SEU-USUARIO/DE_CRM_Metabase_Airflow" data-config="github" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12 0 1.53-.01 2.76-.01 3.14 0 .31.21.67.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+        GitHub
+      </a>
+
+      <button class="nav-toggle" type="button" aria-label="Abrir menu" aria-controls="nav-links" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+    <section class="page-hero">
+      <div class="container">
+        <span class="eyebrow"><i class="dot"></i>Business Intelligence</span>
+        <h1>Construindo os dashboards no <span class="gradient-text">Metabase</span></h1>
+        <p>
+          Guia prático para conectar o PostgreSQL, criar perguntas SQL reutilizáveis,
+          montar dashboards e entregar uma análise confiável de faturamento e recebíveis.
+        </p>
+        <div class="hero-meta">
+          <span><i class="tick">✓</i> Conexão PostgreSQL</span>
+          <span><i class="tick">✓</i> 10+ perguntas prontas</span>
+          <span><i class="tick">✓</i> 4 dashboards</span>
+          <span><i class="tick">✓</i> Filtros e boas práticas</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="container doc-layout">
+      <aside class="doc-nav" aria-label="Índice do guia">
+        <h4>Neste guia</h4>
+        <ul>
+          <li><a href="#pre-requisitos">Pré-requisitos</a></li>
+          <li><a href="#conectar">Conectar o PostgreSQL</a></li>
+          <li><a href="#organizacao">Organização da coleção</a></li>
+          <li><a href="#perguntas">Perguntas SQL</a></li>
+          <li><a href="#kpis">KPIs executivos</a></li>
+          <li><a href="#faturamento">Faturamento</a></li>
+          <li><a href="#recebiveis">Recebíveis e aging</a></li>
+          <li><a href="#clientes">Clientes</a></li>
+          <li><a href="#dashboards">Montagem dos dashboards</a></li>
+          <li><a href="#filtros">Filtros e variáveis</a></li>
+          <li><a href="#formatacao">Formatação</a></li>
+          <li><a href="#entrega">Alertas e entrega</a></li>
+          <li><a href="#boas-praticas">Boas práticas</a></li>
+          <li><a href="#checklist">Checklist final</a></li>
+        </ul>
+      </aside>
+
+      <div class="doc-content">
+        <section id="pre-requisitos">
+          <h2>Pré-requisitos</h2>
+          <ul class="checklist">
+            <li>Tabela <code class="code-inline">DH_INVOICES</code> criada e populada pelo Airflow</li>
+            <li>Metabase instalado e acessível (local, Docker ou cloud)</li>
+            <li>Usuário PostgreSQL com permissão de leitura no schema do DW</li>
+            <li>Rede liberada entre Metabase e <code class="code-inline">192.168.0.100:5432</code></li>
+            <li>Conhecimento básico de SQL e dos campos <code class="code-inline">dl_*</code></li>
+          </ul>
+
+          <div class="callout">
+            <div class="callout-icon">i</div>
+            <div>
+              <p>
+                Antes de abrir o Metabase, valide a carga no PostgreSQL:
+              </p>
+              <p><code class="code-inline">SELECT COUNT(*), MAX(processed_at) FROM DH_INVOICES;</code></p>
+              <p>Se a tabela estiver vazia, execute as DAGs <code class="code-inline">acctech_dl1</code> e <code class="code-inline">acctech_dl2</code>.</p>
+            </div>
+          </div>
+
+          <div class="callout warn">
+            <div class="callout-icon">!</div>
+            <div>
+              <p><strong>Valores de referência dos CSVs atuais:</strong> 12 faturas, 2 clientes, faturamento de <strong>R$ 535.122,94</strong>, recebido de <strong>R$ 409.603,52</strong>, saldo em aberto de <strong>R$ 125.519,42</strong> e ticket médio de <strong>R$ 44.593,58</strong>. Use esses números para validar os primeiros cards.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="conectar">
+          <h2>Conectar o PostgreSQL</h2>
+          <div class="steps">
+            <div class="step">
+              <h3>Acesse o painel administrativo</h3>
+              <p>No Metabase, clique no ícone de engrenagem → <strong>Admin settings</strong> → <strong>Databases</strong>.</p>
+            </div>
+            <div class="step">
+              <h3>Adicione uma nova base</h3>
+              <p>Clique em <strong>Add a database</strong> e escolha <strong>PostgreSQL</strong>.</p>
+            </div>
+            <div class="step">
+              <h3>Preencha a conexão</h3>
+              <p>
+                <strong>Display name:</strong> Accurato DW<br>
+                <strong>Host:</strong> 192.168.0.100<br>
+                <strong>Port:</strong> 5432<br>
+                <strong>Database name:</strong> nome do banco do Data Warehouse<br>
+                <strong>Username:</strong> usuário de leitura<br>
+                <strong>Password:</strong> senha do usuário
+              </p>
+            </div>
+            <div class="step">
+              <h3>Configure SSL e salve</h3>
+              <p>
+                Habilite SSL se o servidor exigir. Clique em <strong>Save</strong> e depois em
+                <strong>Sync database schema now</strong>. O Metabase deve listar a tabela
+                <code class="code-inline">DH_INVOICES</code> (ou <code class="code-inline">dh_invoices</code>).
+              </p>
+            </div>
+          </div>
+
+          <div class="code-block">
+            <div class="code-head"><span>SQL · teste de conectividade</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_faturas,
+       <span class="fn">MIN</span>(dl_dt_date_facture) <span class="kw">AS</span> primeira_data,
+       <span class="fn">MAX</span>(dl_dt_date_facture) <span class="kw">AS</span> ultima_data
+<span class="kw">FROM</span> DH_INVOICES;</code></pre>
+          </div>
+
+          <div class="callout warn">
+            <div class="callout-icon">!</div>
+            <div>
+              <p>
+                Use um usuário dedicado e somente leitura. Não utilize o mesmo usuário do Airflow
+                no Metabase. Se o nome da tabela foi criado sem aspas, prefira
+                <code class="code-inline">DH_INVOICES</code> sem aspas para evitar problemas de
+                case sensitivity.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="organizacao">
+          <h2>Organização da coleção</h2>
+          <p>
+            Crie uma coleção chamada <strong>Accurato | CRM Analytics</strong> e organize as
+            perguntas em subcoleções. Isso facilita permissões, manutenção e reutilização.
+          </p>
+          <div class="code-block">
+            <div class="code-head"><span>Estrutura sugerida</span></div>
+            <pre><code>Accurato | CRM Analytics/
+├── 01_Visão Executiva/
+├── 02_Faturamento/
+├── 03_Recebíveis/
+├── 04_Clientes/
+└── 99_Temporário/        # rascunhos e validações</code></pre>
+          </div>
+          <p>
+            Nomeie as perguntas com um padrão claro: <code class="code-inline">KPI — Faturamento total</code>,
+            <code class="code-inline">Série — Faturamento mensal</code>,
+            <code class="code-inline">Tabela — Faturas em aberto</code>.
+          </p>
+        </section>
+
+        <section id="perguntas">
+          <h2>Perguntas SQL</h2>
+          <p>
+            No Metabase, use <strong>+ New → SQL query</strong>, selecione o banco
+            <strong>Accurato DW</strong> e cole a consulta. Depois escolha a visualização e salve
+            na coleção correspondente.
+          </p>
+          <p>
+            As consultas abaixo usam <strong>Field Filters</strong> opcionais:
+            <code class="code-inline">{{data_fatura}}</code> mapeado para
+            <code class="code-inline">dl_dt_date_facture</code> e
+            <code class="code-inline">{{cliente}}</code> mapeado para
+            <code class="code-inline">dl_st_customer</code>. Ao criar a pergunta, o Metabase exibirá
+            os campos para configurar o tipo e o campo de cada variável.
+          </p>
+
+          <div class="callout">
+            <div class="callout-icon">i</div>
+            <div>
+              <p>
+                Se preferir começar simples, remova os blocos
+                <code class="code-inline">[[AND {{...}}]]</code> e crie os cards sem filtros.
+                Adicione os filtros depois, na etapa de dashboard.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="kpis">
+          <h2>KPIs executivos</h2>
+
+          <h3>1. Faturamento total</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(dl_dc_total), <span class="num">0</span>) <span class="kw">AS</span> faturamento_total
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="num">1</span> = <span class="num">1</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> número (Scalar). <strong>Formato:</strong> moeda BRL.</p>
+
+          <h3>2. Recebido</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span> <span class="fn">COALESCE</span>(
+         <span class="fn">SUM</span>(dl_dc_total - <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>)),
+         <span class="num">0</span>
+       ) <span class="kw">AS</span> recebido
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="num">1</span> = <span class="num">1</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> número. <strong>Formato:</strong> moeda BRL.</p>
+
+          <h3>3. Saldo a receber</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span> <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(dl_dc_balance), <span class="num">0</span>) <span class="kw">AS</span> saldo_a_receber
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>) &gt; <span class="num">0</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> número. <strong>Formato:</strong> moeda BRL.</p>
+
+          <h3>4. Ticket médio</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span> <span class="fn">COALESCE</span>(<span class="fn">AVG</span>(dl_dc_total), <span class="num">0</span>) <span class="kw">AS</span> ticket_medio
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> dl_dc_total <span class="kw">IS NOT NULL</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> número. <strong>Formato:</strong> moeda BRL.</p>
+
+          <h3>5. Quantidade de faturas e clientes</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas,
+  <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> dl_st_customer) <span class="kw">AS</span> clientes
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="num">1</span> = <span class="num">1</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> dois números separados ou tabela de uma linha.</p>
+
+          <h3>6. Taxa de recebimento</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> <span class="fn">SUM</span>(dl_dc_total) = <span class="num">0</span> <span class="kw">THEN</span> <span class="num">0</span>
+    <span class="kw">ELSE</span> <span class="fn">SUM</span>(dl_dc_total - <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>))
+         / <span class="fn">SUM</span>(dl_dc_total)
+  <span class="kw">END</span> <span class="kw">AS</span> taxa_recebimento
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="fn">COALESCE</span>(dl_dc_total, <span class="num">0</span>) &gt; <span class="num">0</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> número. <strong>Formato:</strong> percentual (0 a 100%).</p>
+        </section>
+
+        <section id="faturamento">
+          <h2>Faturamento</h2>
+
+          <h3>Série mensal de faturamento</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, dl_dt_date_facture) <span class="kw">AS</span> mes,
+  <span class="fn">SUM</span>(dl_dc_total) <span class="kw">AS</span> faturamento,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> dl_dt_date_facture <span class="kw">IS NOT NULL</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]]
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">1</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> linha ou barras. <strong>Eixo X:</strong> mês. <strong>Y:</strong> faturamento.</p>
+
+          <h3>Faturamento por cliente</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  dl_st_customer <span class="kw">AS</span> cliente,
+  <span class="fn">SUM</span>(dl_dc_total) <span class="kw">AS</span> faturamento,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas,
+  <span class="fn">AVG</span>(dl_dc_total) <span class="kw">AS</span> ticket_medio
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> dl_st_customer <span class="kw">IS NOT NULL</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">2</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span> <span class="num">10</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> barras horizontais ordenadas por faturamento.</p>
+
+          <h3>Distribuição por moeda</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="fn">COALESCE</span>(dl_st_currency, <span class="st">'N/D'</span>) <span class="kw">AS</span> moeda,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas,
+  <span class="fn">SUM</span>(dl_dc_total) <span class="kw">AS</span> faturamento
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">3</span> <span class="kw">DESC</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> pizza ou barras. Use tabela se houver mais de 4 moedas.</p>
+
+          <h3>Tabela de faturas detalhadas</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  dl_st_ref              <span class="kw">AS</span> referencia,
+  dl_st_customer         <span class="kw">AS</span> cliente,
+  dl_dt_date_facture     <span class="kw">AS</span> emissao,
+  dl_dt_due_to           <span class="kw">AS</span> vencimento,
+  dl_dc_total            <span class="kw">AS</span> total,
+  <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>) <span class="kw">AS</span> saldo,
+  dl_st_currency         <span class="kw">AS</span> moeda
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="num">1</span> = <span class="num">1</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+[[<span class="kw">AND</span> {{cliente}}]]
+<span class="kw">ORDER BY</span> dl_dt_date_facture <span class="kw">DESC</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> tabela, com formatação de moeda nas colunas total e saldo.</p>
+        </section>
+
+        <section id="recebiveis">
+          <h2>Recebíveis e aging</h2>
+
+          <h3>Faturas em aberto</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  dl_st_ref                         <span class="kw">AS</span> referencia,
+  dl_st_customer                    <span class="kw">AS</span> cliente,
+  dl_dt_due_to                      <span class="kw">AS</span> vencimento,
+  dl_dc_total                       <span class="kw">AS</span> total,
+  dl_dc_balance                     <span class="kw">AS</span> saldo,
+  (<span class="fn">CURRENT_DATE</span> - dl_dt_due_to::date) <span class="kw">AS</span> dias_atraso
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>) &gt; <span class="num">0</span>
+[[<span class="kw">AND</span> {{cliente}}]]
+<span class="kw">ORDER BY</span> dl_dt_due_to <span class="kw">ASC</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> tabela. Destaque valores positivos em <code class="code-inline">dias_atraso</code>.</p>
+
+          <h3>Total vencido e a vencer</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(<span class="kw">CASE</span>
+    <span class="kw">WHEN</span> dl_dt_due_to::date &lt; <span class="fn">CURRENT_DATE</span> <span class="kw">THEN</span> dl_dc_balance
+    <span class="kw">ELSE</span> <span class="num">0</span>
+  <span class="kw">END</span>), <span class="num">0</span>) <span class="kw">AS</span> vencido,
+  <span class="fn">COALESCE</span>(<span class="fn">SUM</span>(<span class="kw">CASE</span>
+    <span class="kw">WHEN</span> dl_dt_due_to::date &gt;= <span class="fn">CURRENT_DATE</span> <span class="kw">THEN</span> dl_dc_balance
+    <span class="kw">ELSE</span> <span class="num">0</span>
+  <span class="kw">END</span>), <span class="num">0</span>) <span class="kw">AS</span> a_vencer
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>) &gt; <span class="num">0</span>
+[[<span class="kw">AND</span> {{cliente}}]];</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> dois números ou barras comparativas.</p>
+
+          <h3>Aging por faixa de atraso</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="kw">CASE</span>
+    <span class="kw">WHEN</span> dl_dt_due_to <span class="kw">IS NULL</span> <span class="kw">THEN</span> <span class="st">'Sem vencimento'</span>
+    <span class="kw">WHEN</span> dl_dt_due_to::date &gt;= <span class="fn">CURRENT_DATE</span> <span class="kw">THEN</span> <span class="st">'A vencer'</span>
+    <span class="kw">WHEN</span> <span class="fn">CURRENT_DATE</span> - dl_dt_due_to::date &lt;= <span class="num">30</span> <span class="kw">THEN</span> <span class="st">'1-30 dias'</span>
+    <span class="kw">WHEN</span> <span class="fn">CURRENT_DATE</span> - dl_dt_due_to::date &lt;= <span class="num">60</span> <span class="kw">THEN</span> <span class="st">'31-60 dias'</span>
+    <span class="kw">WHEN</span> <span class="fn">CURRENT_DATE</span> - dl_dt_due_to::date &lt;= <span class="num">90</span> <span class="kw">THEN</span> <span class="st">'61-90 dias'</span>
+    <span class="kw">ELSE</span> <span class="st">'90+ dias'</span>
+  <span class="kw">END</span> <span class="kw">AS</span> faixa,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas,
+  <span class="fn">SUM</span>(dl_dc_balance) <span class="kw">AS</span> saldo
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>) &gt; <span class="num">0</span>
+[[<span class="kw">AND</span> {{cliente}}]]
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">1</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> barras ordenadas por faixa. Cores: verde (a vencer), amarelo (1-30), laranja (31-90), vermelho (90+).</p>
+        </section>
+
+        <section id="clientes">
+          <h2>Clientes</h2>
+
+          <div class="callout">
+            <div class="callout-icon">✓</div>
+            <div>
+              <p>
+                Nos CSVs atuais, faturas e cadastro usam o mesmo nome
+                (<code class="code-inline">AirFrance</code> e <code class="code-inline">TAP</code>).
+                As <strong>12/12 faturas</strong> encontram cliente no merge, portanto
+                <code class="code-inline">dl_st_customer_code</code> e
+                <code class="code-inline">dl_st_document</code> estão preenchidos. O ranking
+                mostra AirFrance com 4 faturas e R$ 455.308,37.
+              </p>
+            </div>
+          </div>
+
+          <h3>Ranking e participação na receita</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  dl_st_customer <span class="kw">AS</span> cliente,
+  <span class="fn">SUM</span>(dl_dc_total) <span class="kw">AS</span> faturamento,
+  <span class="fn">ROUND</span>(
+    <span class="num">100.0</span> * <span class="fn">SUM</span>(dl_dc_total)
+    / <span class="fn">NULLIF</span>(<span class="fn">SUM</span>(<span class="fn">SUM</span>(dl_dc_total)) <span class="kw">OVER</span> (), <span class="num">0</span>),
+    <span class="num">2</span>
+  ) <span class="kw">AS</span> participacao_pct,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas,
+  <span class="fn">AVG</span>(dl_dc_total) <span class="kw">AS</span> ticket_medio
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> dl_st_customer <span class="kw">IS NOT NULL</span>
+[[<span class="kw">AND</span> {{data_fatura}}]]
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">2</span> <span class="kw">DESC</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> tabela com barras na coluna de faturamento ou gráfico de barras.</p>
+
+          <h3>Histórico mensal por cliente</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  <span class="fn">DATE_TRUNC</span>(<span class="st">'month'</span>, dl_dt_date_facture) <span class="kw">AS</span> mes,
+  dl_st_customer <span class="kw">AS</span> cliente,
+  <span class="fn">SUM</span>(dl_dc_total) <span class="kw">AS</span> faturamento
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> dl_dt_date_facture <span class="kw">IS NOT NULL</span>
+  <span class="kw">AND</span> dl_st_customer <span class="kw">IS NOT NULL</span>
+[[<span class="kw">AND</span> {{cliente}}]]
+<span class="kw">GROUP BY</span> <span class="num">1</span>, <span class="num">2</span>
+<span class="kw">ORDER BY</span> <span class="num">1</span>, <span class="num">2</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> linha com uma série por cliente (limite a poucos clientes para manter a legibilidade).</p>
+
+          <h3>Clientes com saldo em aberto</h3>
+          <div class="code-block">
+            <div class="code-head"><span>SQL · PostgreSQL</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span>
+  dl_st_customer <span class="kw">AS</span> cliente,
+  <span class="fn">COUNT</span>(*) <span class="kw">AS</span> faturas_abertas,
+  <span class="fn">SUM</span>(dl_dc_balance) <span class="kw">AS</span> saldo_aberto,
+  <span class="fn">MIN</span>(dl_dt_due_to) <span class="kw">AS</span> vencimento_mais_antigo
+<span class="kw">FROM</span> DH_INVOICES
+<span class="kw">WHERE</span> <span class="fn">COALESCE</span>(dl_dc_balance, <span class="num">0</span>) &gt; <span class="num">0</span>
+<span class="kw">GROUP BY</span> <span class="num">1</span>
+<span class="kw">ORDER BY</span> <span class="num">3</span> <span class="kw">DESC</span>;</code></pre>
+          </div>
+          <p><strong>Visualização:</strong> tabela ou barras horizontais.</p>
+        </section>
+
+        <section id="dashboards">
+          <h2>Montagem dos dashboards</h2>
+          <p>
+            Crie cada dashboard em <strong>+ New → Dashboard</strong>. Adicione os cards salvos,
+            organize o layout em uma grade e conecte os filtros.
+          </p>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-icon">01</div>
+              <h3>Visão Executiva</h3>
+              <ul>
+                <li>Linha de KPIs: faturamento, recebido, saldo, ticket médio, faturas.</li>
+                <li>Série mensal de faturamento.</li>
+                <li>Recebido x em aberto (pizza/rosca).</li>
+                <li>Tabela de faturas em aberto.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-icon violet">02</div>
+              <h3>Faturamento</h3>
+              <ul>
+                <li>Faturamento mensal e quantidade de faturas.</li>
+                <li>Top 10 clientes.</li>
+                <li>Distribuição por moeda.</li>
+                <li>Tabela detalhada de faturas.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-icon amber">03</div>
+              <h3>Recebíveis e Aging</h3>
+              <ul>
+                <li>KPIs vencido e a vencer.</li>
+                <li>Aging por faixa de atraso.</li>
+                <li>Clientes com saldo em aberto.</li>
+                <li>Tabela de faturas em aberto ordenada por vencimento.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <div class="card-icon green">04</div>
+              <h3>Clientes</h3>
+              <ul>
+                <li>Ranking com participação na receita.</li>
+                <li>Ticket médio por cliente.</li>
+                <li>Histórico mensal por cliente.</li>
+                <li>Clientes com saldo em aberto.</li>
+              </ul>
+            </div>
+          </div>
+
+          <h3>Ordem recomendada</h3>
+          <ol>
+            <li>Salve todos os cards antes de montar o dashboard.</li>
+            <li>Adicione primeiro os KPIs no topo, em uma única linha.</li>
+            <li>Coloque os gráficos de tendência no centro.</li>
+            <li>Deixe as tabelas detalhadas na parte inferior.</li>
+            <li>Ative <strong>Auto-arrange</strong> e revise o layout em desktop e mobile.</li>
+            <li>Adicione um texto explicativo com a data da última carga.</li>
+          </ol>
+
+          <div class="code-block">
+            <div class="code-head"><span>SQL · último processamento (card de contexto)</span><button class="copy-btn" type="button">Copiar</button></div>
+            <pre><code><span class="kw">SELECT</span> <span class="fn">MAX</span>(processed_at) <span class="kw">AS</span> ultima_carga
+<span class="kw">FROM</span> DH_INVOICES;</code></pre>
+          </div>
+        </section>
+
+        <section id="filtros">
+          <h2>Filtros e variáveis</h2>
+          <h3>Adicionar filtros ao dashboard</h3>
+          <ol>
+            <li>No dashboard, clique em <strong>Add filter</strong>.</li>
+            <li>Escolha <strong>Time</strong> → <strong>Date range</strong> e nomeie como “Data da fatura”.</li>
+            <li>Em cada card, abra o menu → <strong>Connect to a filter</strong>.</li>
+            <li>Para cards SQL, mapeie o filtro para a variável <code class="code-inline">data_fatura</code>.</li>
+            <li>Repita com um filtro de categoria para <code class="code-inline">cliente</code>.</li>
+          </ol>
+
+          <h3>Configurar as variáveis SQL</h3>
+          <ul>
+            <li><strong>data_fatura:</strong> tipo <em>Field Filter</em>, campo <code class="code-inline">DH_INVOICES.dl_dt_date_facture</code>.</li>
+            <li><strong>cliente:</strong> tipo <em>Field Filter</em>, campo <code class="code-inline">DH_INVOICES.dl_st_customer</code>.</li>
+            <li>Se usar variáveis simples, defina <code class="code-inline">data_inicio</code> e <code class="code-inline">data_fim</code> como <em>Date</em>.</li>
+          </ul>
+
+          <div class="callout">
+            <div class="callout-icon">i</div>
+            <div>
+              <p>
+                Os blocos <code class="code-inline">[[AND {{...}}]]</code> são opcionais: se o filtro
+                não for preenchido, a consulta ignora a condição. Isso permite reutilizar o mesmo
+                card em contextos com e sem filtro.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="formatacao">
+          <h2>Formatação e legibilidade</h2>
+          <ul>
+            <li><strong>Moeda:</strong> configure BRL nas colunas e KPIs monetários.</li>
+            <li><strong>Percentual:</strong> use 0 a 100% com uma casa decimal.</li>
+            <li><strong>Datas:</strong> formato <code class="code-inline">dd/MM/yyyy</code> para o público brasileiro.</li>
+            <li><strong>Números grandes:</strong> exiba “R$ 535,1 mil” em KPIs e valores completos nas tabelas.</li>
+            <li><strong>Cores:</strong> verde para recebido, amarelo para a vencer, vermelho para vencido.</li>
+            <li><strong>Tabelas:</strong> alinhe valores à direita e defina largura mínima para nomes de clientes.</li>
+            <li><strong>Títulos:</strong> use perguntas de negócio, não nomes técnicos de colunas.</li>
+          </ul>
+        </section>
+
+        <section id="entrega">
+          <h2>Alertas, assinaturas e permissões</h2>
+          <h3>Alertas</h3>
+          <ul>
+            <li>Crie um alerta para “Saldo a receber acima de X” ou “Fatura vencida há mais de 30 dias”.</li>
+            <li>Configure a frequência diária e os destinatários.</li>
+            <li>Use o card de faturas em aberto como base para o alerta.</li>
+          </ul>
+
+          <h3>Assinaturas</h3>
+          <ul>
+            <li>Agende o envio do dashboard executivo semanal para a diretoria.</li>
+            <li>Envie o dashboard de recebíveis diariamente para o financeiro.</li>
+            <li>Inclua um texto com a data da última carga no dashboard.</li>
+          </ul>
+
+          <h3>Permissões</h3>
+          <ul>
+            <li>Crie grupos: <strong>Diretoria</strong>, <strong>Financeiro</strong>, <strong>Operação</strong>.</li>
+            <li>Conceda acesso somente às coleções e dashboards necessários.</li>
+            <li>Mantenha a coleção <strong>99_Temporário</strong> restrita à equipe de dados.</li>
+            <li>Use a conta de serviço do Metabase apenas para a conexão com o DW.</li>
+          </ul>
+        </section>
+
+        <section id="boas-praticas">
+          <h2>Boas práticas</h2>
+          <ul>
+            <li><strong>Uma pergunta, uma responsabilidade:</strong> evite SQL gigante em um único card.</li>
+            <li><strong>Reutilize cards:</strong> o mesmo KPI pode aparecer em vários dashboards.</li>
+            <li><strong>Documente as regras:</strong> descreva o cálculo na descrição do card.</li>
+            <li><strong>Valide contra a origem:</strong> compare totais do Metabase com consultas no PostgreSQL.</li>
+            <li><strong>Cuidado com <code class="code-inline">COALESCE</code>:</strong> saldo nulo do Dolibarr é tratado como zero; isso afeta a leitura de recebíveis.</li>
+            <li><strong>Performance:</strong> use filtros de data e evite <code class="code-inline">SELECT *</code> em tabelas grandes.</li>
+            <li><strong>Versionamento:</strong> mantenha o SQL dos cards também na documentação do repositório.</li>
+          </ul>
+
+          <div class="callout warn">
+            <div class="callout-icon">!</div>
+            <div>
+              <p>
+                Como a tabela é recarregada diariamente, dashboards podem refletir a carga mais
+                recente. Se precisar de histórico, evolua o modelo para uma tabela de fatos com
+                snapshots ou um modelo dbt com dimensões de tempo.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section id="checklist">
+          <h2>Checklist final</h2>
+          <ul class="checklist">
+            <li>Conexão PostgreSQL testada e schema sincronizado</li>
+            <li>Cards de KPI salvos na coleção correta</li>
+            <li>Séries temporais com datas e valores formatados</li>
+            <li>Dashboard executivo montado e responsivo</li>
+            <li>Filtros de data e cliente conectados aos cards</li>
+            <li>Cards de recebíveis com <code class="code-inline">COALESCE</code> aplicado</li>
+            <li>Permissões e grupos configurados</li>
+            <li>Alertas e assinaturas ativos</li>
+            <li>Consultas validadas contra o PostgreSQL</li>
+            <li>Documentação do dashboard atualizada no repositório</li>
+          </ul>
+
+          <div class="hero-actions" style="margin-top: 26px;">
+            <a class="btn btn-primary" href="documentacao.html">Voltar à documentação</a>
+            <a class="btn btn-ghost" href="index.html#dashboards">Ver visão dos dashboards</a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <span class="brand-mark">AD</span>
+            <span class="brand-text">
+              <strong>Accurato Data</strong>
+              <span>Data Engineering Portfolio</span>
+            </span>
+          </a>
+          <p>Guia de Business Intelligence com Metabase sobre o Data Warehouse PostgreSQL.</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h5>Guia</h5>
+            <a href="metabase.html#conectar">Conectar banco</a>
+            <a href="metabase.html#perguntas">Perguntas SQL</a>
+            <a href="metabase.html#dashboards">Dashboards</a>
+            <a href="metabase.html#checklist">Checklist</a>
+          </div>
+          <div class="footer-col">
+            <h5>Projeto</h5>
+            <a href="index.html">Portfólio</a>
+            <a href="documentacao.html">Documentação</a>
+            <a href="https://github.com/SEU-USUARIO/DE_CRM_Metabase_Airflow" data-config="github" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> Rafael Orizio. Guia Metabase.</span>
+        <span>SQL · PostgreSQL · Metabase</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/script.js"></script>
+</body>
+</html>
