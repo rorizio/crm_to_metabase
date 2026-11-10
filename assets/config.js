@@ -5,7 +5,7 @@
 window.PORTFOLIO_CONFIG = {
   owner: "Rafael Orizio",
   role: "Engenheiro de Dados",
-  github: "https://github.com/rafaelorizio/DE_CRM_Metabase_Airflow",
-  linkedin: "https://www.linkedin.com/in/rafaelorizio",
+  github: "https://rorizio.github.io/crm_to_metabase/",
+  linkedin: "https://www.linkedin.com/in/rafael-orizio",
   email: "rorizio@gmail.com"
 };
